@@ -1,0 +1,90 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: mall-gateway
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    database: 0
+    timeout: 3000ms
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        # User Service
+        - id: mall-user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/user/**, /api/admin/users/**
+          filters:
+            - StripPrefix=0
+
+        # Product Service
+        - id: mall-product-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products/**, /api/admin/products/**, /api/categories/**, /api/admin/categories/**, /api/admin/brands/**, /api/brands/**
+          filters:
+            - StripPrefix=0
+
+        # Order Service
+        - id: mall-order-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/orders/**, /api/admin/orders/**
+          filters:
+            - StripPrefix=0
+
+        # Payment Service
+        - id: mall-payment-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/payments/**, /api/refunds/**, /api/admin/payments/**, /api/admin/refunds/**
+          filters:
+            - StripPrefix=0
+
+        # Inventory Service
+        - id: mall-inventory-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/inventory/**, /api/admin/inventory/**
+          filters:
+            - StripPrefix=0
+
+        # Marketing Service
+        - id: mall-marketing-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/seckill/**, /api/coupons/**, /api/promotions/**, /api/admin/seckill/**, /api/admin/coupons/**, /api/admin/promotions/**
+          filters:
+            - StripPrefix=0
+
+        # Data Service
+        - id: mall-data-service
+          uri: http://localhost:8087
+          predicates:
+            - Path=/api/admin/stats/**
+          filters:
+            - StripPrefix=0
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+  sentinel:
+    transport:
+      dashboard: ${SENTINEL_DASHBOARD:localhost:8858}
+      port: 8719
+    eager: true
+
+app:
+  jwt:
+    secret: mall-jwt-secret-key-change-in-production
+    expire-hours: 24
+
+logging:
+  level:
+    com.mall.gateway: DEBUG
